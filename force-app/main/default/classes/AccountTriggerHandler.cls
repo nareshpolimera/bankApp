@@ -6,5 +6,6 @@ public class AccountTriggerHandler {
         List<Account> newAccounts,
         Map<Id, Account> oldAccountsById
     ) {
+        System.debug('TEsting PR');
     }
 }
