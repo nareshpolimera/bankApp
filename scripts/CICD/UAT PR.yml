@@ -1,0 +1,38 @@
+name: Validate PR (UAT)
+
+# Runs on every PR targeting the UAT branch.
+# Dry-run only — validates the metadata deploys cleanly with full local tests,
+# nothing actually gets deployed here.
+
+on:
+  pull_request:
+    branches:
+      - UAT
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Salesforce CLI
+        run: npm install @salesforce/cli --global
+
+      - name: Authenticate to UAT Sandbox
+        run: |
+          echo "${{ secrets.SFDX_AUTH_URL_UAT }}" | sf org login sfdx-url --alias uatSandbox --sfdx-url-stdin
+
+      - name: Verify Org Authentication
+        run: sf org list
+
+      - name: Validate Deployment (Dry Run)
+        run: |
+          sf project deploy start \
+            --source-dir force-app \
+            -o uatSandbox \
+            --dry-run \
+            --test-level RunLocalTests \
+            --wait 30

@@ -1,0 +1,14 @@
+Connect your org to Salesforce Org - Alias Name is IMP
+
+Get the verbose output of the org - sf org display --target-org bankGitCICI --verbose
+Copy the url from the verbose output
+Open the url in a browser.
+Create a new Github Repository.
+Open Settings
+Secrets and variables
+Actions
+Add new Repository secret --> SFDX_AUTH_URL
+Now Add the following workflow file to the repository:
+    .github/workflows/deploy.yml
+    .github/workflows/branch build.yml
+    .github/workflows/pr validate.yml

@@ -1,0 +1,46 @@
+name: Feature Branch Build
+
+# Default build — runs automatically the moment you push to ANY feature branch.
+# Gives fast feedback against the Dev Sandbox before a PR is even opened.
+# develop, release/uat, and main are excluded — they're handled by their own workflows.
+
+on:
+  push:
+    branches:
+      - '**'
+      - '!main'
+      - '!develop'
+      - '!release/uat'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Show branch info
+        run: |
+          echo "Branch pushed: ${{ github.ref_name }}"
+          echo "Commit SHA: ${{ github.sha }}"
+          echo "Triggered by: ${{ github.actor }}"
+
+      - name: Install Salesforce CLI
+        run: npm install @salesforce/cli --global
+
+      - name: Authenticate to Dev Sandbox
+        run: |
+          echo "${{ secrets.SFDX_AUTH_URL_DEV }}" | sf org login sfdx-url --alias bankGitCICI --sfdx-url-stdin
+
+      - name: Verify Org Authentication
+        run: sf org list
+
+      - name: Validate Deployment (Dry Run)
+        run: |
+          sf project deploy start \
+            --source-dir force-app \
+            -o bankGitCICI \
+            --dry-run \
+            --test-level NoTestRun \
+            --wait 30
